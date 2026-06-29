@@ -79,33 +79,49 @@ cd build/dist/js/productionExecutable && python3 -m http.server 8099
 
 ## Deploy to Vercel
 
-> 🛑 **Getting `404: NOT_FOUND` from Vercel?** That happens when you import the repo
-> through Vercel's **dashboard / Git integration**. Vercel's build image has **no JVM or
-> Gradle**, so it can't build this project and ends up serving nothing. **Don't use the
-> Git import.** Build the static site yourself (where the JVM is) and upload the prebuilt
-> folder — that folder is the one containing `index.html`:
-> `build/dist/js/productionExecutable`.
+> ℹ️ **About the `404: NOT_FOUND` you may have seen.** Vercel's build image has **no JVM
+> or Gradle**, so it cannot compile this Kotlin project — a plain Git import builds nothing
+> and serves a 404. There are two ways to get a working site; pick one.
 
-### Easiest — the deploy script
+### Option 1 — Git integration with a committed snapshot (zero CLI)
+
+A prebuilt copy of the site is committed at **`public/`** (both at the repo root and here
+in `web/public/`), and `vercel.json` tells Vercel to **skip building** and just serve it:
+
+```json
+{ "buildCommand": "echo prebuilt-static-site", "outputDirectory": "public" }
+```
+
+So a normal Vercel **Git import just works** — every push redeploys the committed `public/`.
+The trade-off: `public/` is a snapshot, so after changing the app you must regenerate it:
+
+```bash
+cd web
+./gradlew jsBrowserDistribution
+cp build/dist/js/productionExecutable/* public/ ../public/   # refresh both snapshots
+git commit -am "web: update demo" && git push
+```
+
+> If your Vercel project's **Root Directory** is `./` it serves the repo-root `public/`;
+> if it's `web` it serves `web/public/`. Both are committed, so either setting works.
+
+### Option 2 — CLI / script (no committed artifacts)
+
+Build locally and upload the fresh output directly — nothing committed, always current:
 
 ```bash
 cd web
 ./deploy.sh            # builds, then deploys build/dist/js/productionExecutable to Vercel
 ```
 
-The first run will ask you to log in (`vercel login`) and link/create a project; after
-that it just deploys. (Use `./deploy.sh --preview` for a non-production deploy.)
-
-### Or the equivalent commands by hand
+The first run asks you to log in (`vercel login`) and link/create a project; after that it
+just deploys. (`./deploy.sh --preview` for a non-production deploy.) Equivalent by hand:
 
 ```bash
 cd web
 ./gradlew jsBrowserDistribution                              # -> build/dist/js/productionExecutable/
-npx vercel deploy build/dist/js/productionExecutable --prod  # deploy the BUILT folder, not web/ or the repo root
+npx vercel deploy build/dist/js/productionExecutable --prod  # deploy the BUILT folder
 ```
-
-The trick is pointing Vercel at `build/dist/js/productionExecutable` (the folder that has
-`index.html`). Deploying `web/` or the repo root is what gives you the 404.
 
 ### Automated (GitHub Actions — no local CLI)
 

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bakong KHQR — Kotlin Web Demo</title>
+  <meta name="description" content="Generate Bakong KHQR payment codes and check transactions, in the browser, powered by Kotlin/JS." />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <style>
+    body { display: flex; flex-direction: column; min-height: 100vh; background: #fafafa; }
+    main { flex: 1 0 auto; }
+    .brand-logo { padding-left: 18px; font-weight: 600; }
+    .section-title { display: flex; align-items: center; gap: 8px; }
+    .qr-box { display: flex; justify-content: center; padding: 16px; }
+    #qrcode { background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
+    .mono { font-family: "Roboto Mono", monospace; word-break: break-all; background: #f0f0f0;
+            padding: 10px 12px; border-radius: 6px; font-size: .82rem; display: block; }
+    .status { font-weight: 600; min-height: 1.4rem; margin-top: 10px; }
+    .warn { background: #fff8e1; border-left: 4px solid #ffb300; padding: 12px 16px; border-radius: 6px; }
+    .note { font-size: .85rem; color: #616161; }
+    label.copy-link { cursor: pointer; }
+    .field-help { font-size: .75rem; color: #9e9e9e; }
+  </style>
+</head>
+<body>
+  <nav class="teal darken-1" role="navigation">
+    <div class="nav-wrapper container">
+      <span class="brand-logo">🇰🇭 Bakong KHQR — Kotlin Web Demo</span>
+    </div>
+  </nav>
+
+  <main class="container" style="margin-top: 24px;">
+    <div class="row">
+      <div class="col s12">
+        <div class="warn">
+          <strong>Demo &amp; educational — read before entering a token.</strong>
+          <ul class="note" style="margin: 6px 0 0 0;">
+            <li>QR / MD5 generation runs <strong>entirely in your browser</strong> — no token and no server needed.</li>
+            <li>Your <strong>token is used only in your browser</strong> and sent directly to Bakong; it is never sent to this site's host.</li>
+            <li>Prefer the <strong>Sandbox</strong> environment. Production transaction checks require a Cambodia IP or an <code>rbk…</code> Relay token, and browsers are usually blocked by CORS.</li>
+            <li>Unofficial project — not affiliated with the National Bank of Cambodia.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 1: details -->
+    <div class="row">
+      <div class="col s12">
+        <div class="card">
+          <div class="card-content">
+            <span class="card-title section-title"><i class="material-icons teal-text">qr_code_2</i> 1. Merchant &amp; QR details</span>
+            <div class="row" style="margin-bottom:0;">
+              <div class="input-field col s12 m6">
+                <input id="accountId" type="text" value="your_name@bank" />
+                <label for="accountId" class="active">Account ID *</label>
+                <span class="field-help">Your Bakong account id, e.g. your_name@bank</span>
+              </div>
+              <div class="input-field col s12 m6">
+                <input id="merchantName" type="text" value="Your Shop" />
+                <label for="merchantName" class="active">Merchant name *</label>
+              </div>
+              <div class="input-field col s12 m6">
+                <input id="merchantCity" type="text" value="Phnom Penh" />
+                <label for="merchantCity" class="active">Merchant city</label>
+              </div>
+              <div class="input-field col s12 m3">
+                <input id="amount" type="number" min="0" step="0.01" value="100" />
+                <label for="amount" class="active">Amount</label>
+                <span class="field-help">0 or empty = static QR</span>
+              </div>
+              <div class="input-field col s12 m3">
+                <select id="currency">
+                  <option value="KHR">KHR (Riel)</option>
+                  <option value="USD" selected>USD (Dollar)</option>
+                </select>
+                <label>Currency</label>
+              </div>
+              <div class="input-field col s12 m6">
+                <input id="billNumber" type="text" value="INV-0001" />
+                <label for="billNumber" class="active">Bill number</label>
+              </div>
+              <div class="input-field col s12 m6">
+                <input id="phoneNumber" type="text" value="" />
+                <label for="phoneNumber" class="active">Phone number</label>
+              </div>
+              <div class="input-field col s12 m6">
+                <input id="storeLabel" type="text" value="" />
+                <label for="storeLabel" class="active">Store label</label>
+              </div>
+              <div class="input-field col s12 m6">
+                <input id="terminalLabel" type="text" value="" />
+                <label for="terminalLabel" class="active">Terminal label</label>
+              </div>
+              <div class="input-field col s12 m3">
+                <input id="expiration" type="number" min="1" value="1" />
+                <label for="expiration" class="active">Expiration (days)</label>
+              </div>
+              <div class="col s12 m6" style="margin-top: 28px;">
+                <div class="switch">
+                  <label>
+                    Dynamic
+                    <input type="checkbox" id="staticQr" />
+                    <span class="lever"></span>
+                    Static (reusable)
+                  </label>
+                </div>
+              </div>
+            </div>
+            <button id="generateBtn" class="btn waves-effect teal darken-1">
+              <i class="material-icons left">qr_code</i>Generate QR
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div class="row" id="resultCard" style="display:none;">
+      <div class="col s12 m5">
+        <div class="card"><div class="card-content">
+          <span class="card-title">Scan to pay</span>
+          <div class="qr-box"><div id="qrcode"></div></div>
+        </div></div>
+      </div>
+      <div class="col s12 m7">
+        <div class="card"><div class="card-content">
+          <span class="card-title">KHQR payload</span>
+          <p class="note">QR string</p>
+          <code id="qrString" class="mono"></code>
+          <button id="copyQrBtn" class="btn-small waves-effect grey lighten-1 black-text" style="margin-top:8px;">
+            <i class="material-icons left">content_copy</i>Copy QR
+          </button>
+          <p class="note" style="margin-top:16px;">MD5 (transaction id)</p>
+          <code id="md5Value" class="mono"></code>
+          <button id="copyMd5Btn" class="btn-small waves-effect grey lighten-1 black-text" style="margin-top:8px;">
+            <i class="material-icons left">content_copy</i>Copy MD5
+          </button>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- Step 2: check -->
+    <div class="row">
+      <div class="col s12">
+        <div class="card"><div class="card-content">
+          <span class="card-title section-title"><i class="material-icons teal-text">verified</i> 2. Check a payment</span>
+          <p class="note">Uses your credentials to ask Bakong whether the transaction was paid.</p>
+          <div class="row" style="margin-bottom:0;">
+            <div class="input-field col s12 m3">
+              <select id="environment">
+                <option value="SANDBOX" selected>Sandbox (SIT)</option>
+                <option value="PRODUCTION">Production</option>
+              </select>
+              <label>Environment</label>
+            </div>
+            <div class="input-field col s12 m9">
+              <input id="token" type="password" />
+              <label for="token">Bakong Developer Token (eyJ… or rbk…)</label>
+            </div>
+            <div class="input-field col s12">
+              <input id="checkMd5" type="text" />
+              <label for="checkMd5" class="active">MD5 to check (auto-filled after generating)</label>
+            </div>
+          </div>
+          <button id="checkBtn" class="btn waves-effect teal darken-1">
+            <i class="material-icons left">search</i>Check payment
+          </button>
+          <div id="checkStatus" class="status"></div>
+          <p class="note" style="margin-top:14px;">
+            ℹ️ If the check fails with a network/CORS error, that's expected from a browser:
+            the Bakong API does not allow direct cross-origin calls, and production checks are
+            limited to Cambodia IPs. Use an <code>rbk…</code> Relay token, or run the checks
+            server-side with the <code>kotlin-bakong</code> JVM library.
+          </p>
+        </div></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="page-footer teal darken-1">
+    <div class="container note" style="color:#e0f2f1; padding: 14px 0;">
+      Built with Kotlin/JS. KHQR generation by the <code>kotlin-bakong</code> core (ported to commonMain).
+      Unofficial &amp; educational — "Bakong" and "KHQR" are marks of the National Bank of Cambodia.
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    function renderKhqr(text) {
+      var el = document.getElementById('qrcode');
+      el.innerHTML = '';
+      // eslint-disable-next-line no-undef
+      new QRCode(el, { text: text, width: 260, height: 260, correctLevel: QRCode.CorrectLevel.M });
+    }
+    function showToast(message) {
+      if (window.M && M.toast) { M.toast({ html: message, displayLength: 4000 }); }
+      else { console.log(message); }
+    }
+    function copyText(text) {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(function () { showToast('Copied'); });
+      } else { showToast('Clipboard unavailable'); }
+    }
+  </script>
+  <script src="khqr-web.js"></script>
+</body>
+</html>
