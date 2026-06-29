@@ -22,6 +22,21 @@
     .note { font-size: .85rem; color: #616161; }
     label.copy-link { cursor: pointer; }
     .field-help { font-size: .75rem; color: #9e9e9e; }
+
+    /* KHQR payment card — approximates NBC's KHQR card layout.
+       NOTE: replace the text wordmark with the official KHQR logo asset from the NBC,
+       and use the official red, per the KHQR brand guideline. */
+    .khqr-card { max-width: 340px; margin: 0 auto; background: #fff; border-radius: 14px;
+                 overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,.18); }
+    .khqr-header { background: #e2231a; height: 72px; padding: 14px 20px;
+                   clip-path: polygon(0 0, 100% 0, 100% 58%, 0 100%); }
+    .khqr-logo { color: #fff; font-weight: 800; font-size: 1.5rem; letter-spacing: 1px; }
+    .khqr-body { padding: 4px 22px 22px; }
+    .khqr-merchant { font-weight: 600; font-size: 1.05rem; color: #222; }
+    .khqr-amount { font-size: 1.8rem; font-weight: 700; color: #111; margin: 4px 0 2px; }
+    .khqr-ccy { font-size: 1rem; font-weight: 600; color: #777; margin-left: 4px; }
+    .khqr-divider { border: none; border-top: 2px dashed #e0e0e0; margin: 16px 0; }
+    .khqr-foot { text-align: center; font-size: .72rem; color: #9e9e9e; margin-top: 12px; }
   </style>
 </head>
 <body>
@@ -120,10 +135,17 @@
     <!-- Result -->
     <div class="row" id="resultCard" style="display:none;">
       <div class="col s12 m5">
-        <div class="card"><div class="card-content">
-          <span class="card-title">Scan to pay</span>
-          <div class="qr-box"><div id="qrcode"></div></div>
-        </div></div>
+        <!-- KHQR card. Swap the text logo for the official KHQR asset from the NBC. -->
+        <div class="khqr-card">
+          <div class="khqr-header"><span class="khqr-logo">KHQR</span></div>
+          <div class="khqr-body">
+            <div class="khqr-merchant" id="cardMerchant">Your Shop</div>
+            <div class="khqr-amount"><span id="cardAmount">0.00</span><span class="khqr-ccy" id="cardCurrency">USD</span></div>
+            <hr class="khqr-divider" />
+            <div class="qr-box"><div id="qrcode"></div></div>
+            <div class="khqr-foot">Scan with any Bakong-supported app</div>
+          </div>
+        </div>
       </div>
       <div class="col s12 m7">
         <div class="card"><div class="card-content">

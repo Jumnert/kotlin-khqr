@@ -7,11 +7,6 @@ plugins {
     `maven-publish`
 }
 
-// NOTE FOR PUBLISHING:
-// `group` is the Maven coordinate prefix. Change it to a namespace you own before
-// publishing to Maven Central (e.g. "io.github.<your-github-username>").
-// JitPack ignores this and publishes under "com.github.<user>" automatically, so
-// the default below works out of the box for JitPack.
 group = "dev.khqr"
 version = "0.1.0"
 
@@ -76,7 +71,7 @@ publishing {
                 developers {
                     developer {
                         id.set("Jumnert")
-                        name.set("Your Name")
+                        name.set("Jumnert")
                     }
                 }
                 scm {

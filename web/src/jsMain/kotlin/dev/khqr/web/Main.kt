@@ -55,6 +55,19 @@ private fun onGenerate() {
         setText("qrString", result.qr)
         setText("md5Value", result.md5)
         renderKhqr(result.qr)
+
+        // Populate the KHQR card.
+        val amount = value("amount").toDoubleOrNull() ?: 0.0
+        val isStatic = checked("staticQr") || amount <= 0.0
+        setText("cardMerchant", params.merchantName)
+        if (isStatic) {
+            setText("cardAmount", "Open amount")
+            setText("cardCurrency", "")
+        } else {
+            setText("cardAmount", amount.asDynamic().toFixed(2) as String)
+            setText("cardCurrency", params.currency.name)
+        }
+
         show("resultCard")
         // pre-fill the MD5 used by the payment checker
         (byId("checkMd5") as? HTMLInputElement)?.value = result.md5
