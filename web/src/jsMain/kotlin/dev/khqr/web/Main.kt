@@ -59,14 +59,11 @@ private fun onGenerate() {
         // Populate the KHQR card.
         val amount = value("amount").toDoubleOrNull() ?: 0.0
         val isStatic = checked("staticQr") || amount <= 0.0
+        val symbol = if (params.currency == KHQRCurrency.USD) "$" else "\u17DB" // $ or ៛
         setText("cardMerchant", params.merchantName)
-        if (isStatic) {
-            setText("cardAmount", "Open amount")
-            setText("cardCurrency", "")
-        } else {
-            setText("cardAmount", amount.asDynamic().toFixed(2) as String)
-            setText("cardCurrency", params.currency.name)
-        }
+        setText("cardSym", symbol)
+        setText("qrBadge", symbol)
+        setText("cardAmount", if (isStatic) "0" else (amount.asDynamic().toFixed(2) as String))
 
         show("resultCard")
         // pre-fill the MD5 used by the payment checker

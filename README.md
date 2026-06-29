@@ -1,119 +1,39 @@
 # kotlin-bakong
 
-A Kotlin library for **Bakong KHQR** — Cambodia's national QR payment standard from the
-National Bank of Cambodia (NBC). Generate EMVCo-compliant KHQR payment strings, MD5
-transaction hashes, deep links, and scannable QR images, then verify payments through
-the **Bakong Open API**.
+**Kotlin/JVM library for Bakong KHQR** — Cambodia's national QR payment standard by the National Bank of Cambodia (NBC).
 
-> 🇰🇭 If you build on the JVM (Kotlin, or Java via interop) and want to accept Bakong /
-> KHQR payments, this library gives you the QR generation and transaction-checking
-> pieces with **no Spring required** and only a tiny dependency footprint.
+Generate EMVCo-compliant KHQR payment strings, MD5 transaction hashes, scannable QR images, and deep links. Verify payments through the Bakong Open API — all with a tiny dependency footprint, no Spring required.
 
-> ⚠️ **Unofficial & educational.** This is a community project, not affiliated with or
-> endorsed by the NBC. "Bakong" and "KHQR" are NBC marks. See [LICENSE](LICENSE).
-> Always test in the sandbox before handling real money.
+[![JitPack](https://jitpack.io/v/Jumnert/Kotlin-Bakong.svg)](https://jitpack.io/#Jumnert/Kotlin-Bakong)
 
----
-
-## Table of Contents
-
-- [Features](#features)
-- [Web demo (Kotlin/JS → Vercel)](#web-demo-kotlinjs--vercel)
-- [Requirements](#requirements)
-- [Get a Bakong Developer Token (Bearer Token)](#get-a-bakong-developer-token-bearer-token)
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-- [Usage](#usage)
-  - [Create a QR](#create-a-qr)
-  - [`createQr` parameters](#createqr-parameters)
-  - [MD5 hash](#md5-hash)
-  - [QR image](#qr-image)
-  - [Deep link](#deep-link)
-  - [Check a payment](#check-a-payment)
-  - [Get payment details](#get-payment-details)
-  - [Check many payments at once](#check-many-payments-at-once)
-  - [Polling for payment](#polling-for-payment)
-  - [Renew token](#renew-token)
-- [Environments & IP restriction](#environments--ip-restriction)
-- [KHQR card UI & branding](#khqr-card-ui--branding)
-- [Building from source](#building-from-source)
-- [Releasing](#releasing)
-- [Continuous Integration](#continuous-integration)
-- [Resources](#resources)
-- [License](#license)
+> ⚠️ **Unofficial & educational.** Not affiliated with or endorsed by the NBC. Always test in the sandbox before handling real money. See [LICENSE](LICENSE).
 
 ---
 
 ## Features
 
-- ✅ **KHQR string generation** — EMVCo TLV encoding with CRC-16/CCITT, static & dynamic QRs, USD/KHR.
-- ✅ **MD5 transaction hash** — the identifier used to check payments.
-- ✅ **QR images** — PNG bytes, file, base64, or `data:` URI (via ZXing).
-- ✅ **Bakong Open API client** — check payment, bulk check, get payment details, deep link, renew token.
-- ✅ **Bakong Relay (RBK) support** — pass an `rbk...` token to automatically target the Relay API.
-- ✅ **Tiny footprint** — uses the JDK's built-in HTTP client; only `kotlinx-serialization-json` + `zxing`.
-- ✅ **Java-friendly** — `@JvmOverloads` constructors/methods.
+- ✅ KHQR string generation — EMVCo TLV encoding, CRC-16/CCITT, static & dynamic QRs, USD & KHR
+- ✅ MD5 transaction hash — the identifier used to check payments
+- ✅ QR images — PNG bytes, file, base64, or `data:` URI (via ZXing)
+- ✅ Bakong Open API — check payment, bulk check, payment details, deep link, renew token
+- ✅ Bakong Relay (RBK) support — call the API from outside Cambodia
+- ✅ Tiny footprint — JDK built-in HTTP client + `kotlinx-serialization-json` + `zxing` only
+- ✅ Java-friendly — `@JvmOverloads` on all constructors and methods
 
-## Web demo (Kotlin/JS → Vercel)
-
-The [`web/`](web/) folder is a **Kotlin/JS** browser demo with a simple Material UI. It
-generates KHQR codes, the MD5 hash, and a scannable QR image **entirely in the browser**,
-and lets you check a payment with your own credentials. See [`web/README.md`](web/README.md).
-
-```bash
-cd web
-./gradlew jsBrowserDistribution                 # -> build/dist/js/productionExecutable/
-npx vercel deploy build/dist/js/productionExecutable --prod
-```
-
-> ℹ️ **Hosting note.** Vercel runs static sites and serverless functions — **not** a JVM
-> process — so a Ktor/JVM server can't run on Vercel. The demo sidesteps this by compiling
-> **Kotlin to a static site**, which Vercel (or Netlify, Cloudflare Pages, GitHub Pages)
-> serves natively. The pure KHQR logic is shared in `commonMain` and verified to match this
-> library byte-for-byte. If you need server-side transaction checks (Cambodia IP / no CORS),
-> host a small JVM service using this library on **Railway / Render / Fly.io / Cloud Run**.
+---
 
 ## Requirements
 
-- **JDK 17+** (the library is compiled to JVM 17 bytecode).
-- A **Bakong account** with full KYC verification (use the Bakong mobile app).
-- A **Bakong Developer Token** (bearer token) — see below.
-- For transaction checks in production: a server with a **Cambodia IP address**, *or* a
-  **Bakong Relay (RBK) token**. See [Environments & IP restriction](#environments--ip-restriction).
+- JDK 17+
+- A **Bakong account** with full KYC verification (Bakong mobile app)
+- A **Bakong Developer Token** (bearer token) for transaction-checking endpoints
+- For production transaction checks: a **Cambodia IP address**, or a **Bakong Relay token**
 
-## Get a Bakong Developer Token (Bearer Token)
-
-The transaction-checking endpoints require a **bearer token**. To get one:
-
-1. Create and **KYC-verify** a Bakong account in the Bakong mobile app.
-2. Go to the **Bakong Open API portal**: <https://api-bakong.nbc.gov.kh/> and register with
-   your email (registration page: <https://api-bakong.nbc.gov.kh/register/>).
-3. You'll receive a **bearer token** (a long `eyJ...` JWT). Use it when constructing `KHQR`:
-
-   ```kotlin
-   val khqr = KHQR("eyJhbGciOiJIUzI1NiIsInR5cCI6...your_token")
-   ```
-
-4. Tokens expire. You can request a fresh one programmatically with
-   [`renewToken(email)`](#renew-token), or re-issue it from the portal.
-
-> 🔒 **Keep your token secret.** Don't commit it to version control. Load it from an
-> environment variable or a secrets manager. (`.env`, `*.local`, and `secrets.properties`
-> are already git-ignored in this repo.)
-
-> 💡 Alternatively, a **Bakong Relay (RBK)** token (from <https://bakongrelay.com/>) lets you
-> call the API from outside Cambodia. Pass it the same way — any token starting with `rbk`
-> automatically routes to the Relay API.
+---
 
 ## Installation
 
-The artifact id is **`kotlin-bakong`**, version **`0.1.0`**.
-
-### Option A — JitPack (easiest, zero setup)
-
-[![](https://jitpack.io/v/Jumnert/Kotlin-Bakong.svg)](https://jitpack.io/#Jumnert/Kotlin-Bakong)
-
-`settings.gradle.kts`:
+Add JitPack to `settings.gradle.kts`:
 
 ```kotlin
 dependencyResolutionManagement {
@@ -124,7 +44,7 @@ dependencyResolutionManagement {
 }
 ```
 
-`build.gradle.kts`:
+Add the dependency in `build.gradle.kts`:
 
 ```kotlin
 dependencies {
@@ -132,38 +52,17 @@ dependencies {
 }
 ```
 
-> The coordinate is **case-sensitive** and must match the repo exactly:
-> `com.github.Jumnert:Kotlin-Bakong`. The version can be a branch
-> (`main-SNAPSHOT`), a short commit hash (e.g. `e15bf15`), or a Git tag. There are
-> no release tags yet, so use `main-SNAPSHOT` — or push a tag (see
-> [Releasing](#releasing)) and then use that tag as the version, e.g. `0.1.0`.
+> Use `main-SNAPSHOT` for the latest, or pin to a specific commit hash or tag (e.g. `0.1.0`).
 
-### Option B — GitHub Packages
-
-Published automatically by the [release workflow](#releasing) under group `dev.khqr`:
-
-```kotlin
-repositories {
-    maven {
-        url = uri("https://maven.pkg.github.com/Jumnert/Kotlin-Bakong")
-        credentials {
-            username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GITHUB_ACTOR")
-            password = providers.gradleProperty("gpr.key").orNull ?: System.getenv("GITHUB_TOKEN")
-        }
-    }
-}
-dependencies {
-    implementation("dev.khqr:kotlin-bakong:0.1.0")
-}
-```
-
-### Option C — Maven Central
-
-Requires owning the group coordinate — see [Releasing → Maven Central](#publishing-to-maven-central).
-
-### Maven
+**Maven:**
 
 ```xml
+<repositories>
+  <repository>
+    <id>jitpack.io</id>
+    <url>https://jitpack.io</url>
+  </repository>
+</repositories>
 <dependency>
   <groupId>com.github.Jumnert</groupId>
   <artifactId>Kotlin-Bakong</artifactId>
@@ -171,101 +70,150 @@ Requires owning the group coordinate — see [Releasing → Maven Central](#publ
 </dependency>
 ```
 
+---
+
+## Get a Developer Token
+
+Transaction-checking endpoints require a bearer token (`eyJ...` JWT):
+
+1. KYC-verify your account in the **Bakong mobile app**.
+2. Register at <https://api-bakong.nbc.gov.kh/register/> with your email.
+3. You'll receive a bearer token. Pass it when constructing `KHQR`:
+
+```kotlin
+val khqr = KHQR("your_developer_token")
+```
+
+Tokens expire — renew programmatically with [`renewToken()`](#renew-token) or re-issue from the portal.
+
+> 🔒 Keep your token secret. Don't commit it to version control.
+
+> 🌐 **Outside Cambodia?** Use a [Bakong Relay (RBK) token](https://bakongrelay.com/). Any token starting with `rbk` automatically routes to `https://api.bakongrelay.com`, bypassing the Cambodia IP restriction.
+
+---
+
 ## Quick Start
 
 ```kotlin
 import dev.khqr.KHQR
 import dev.khqr.KHQRCurrency
-import dev.khqr.TransactionStatus
+import dev.khqr.QrImage
 
-val khqr = KHQR(System.getenv("BAKONG_TOKEN"))
+val khqr = KHQR("your_developer_token")
 
-// 1. Create a dynamic QR for 100 USD
+// Generate a dynamic QR for 100 KHR
 val qr = khqr.createQr(
-    accountId = "your_name@bank",   // your Bakong account id (see the mobile app)
+    accountId = "your_name@bank",   // your Bakong account ID (from the mobile app)
     merchantName = "Your Shop",
     merchantCity = "Phnom Penh",
     amount = 100.0,
-    currency = KHQRCurrency.USD,
-    billNumber = "INV-0001",
+    currency = KHQRCurrency.KHR,
 )
 
-// 2. Hash + image
-val md5 = khqr.generateMd5(qr)
-val pngBytes = khqr.qrImage(qr)          // ByteArray (PNG) to show the customer
-
-// 3. After the customer pays, verify it
-if (khqr.checkPayment(md5) == TransactionStatus.PAID) {
-    println("Paid! ✅")
-}
+val md5 = khqr.generateMd5(qr)     // MD5 hash — use this to verify payment later
+QrImage.save(qr, "out/khqr.png")   // save QR as PNG
 ```
+
+---
 
 ## Usage
 
 ### Create a QR
 
 ```kotlin
-// Dynamic QR (fixed amount, expires)
-val dynamic = khqr.createQr(
+// Dynamic QR — fixed amount, expires after 1 day by default
+val qr = khqr.createQr(
     accountId = "your_name@bank",
     merchantName = "Your Shop",
     merchantCity = "Phnom Penh",
     amount = 9800.0,
     currency = KHQRCurrency.KHR,
-    storeLabel = "Phsar Thmei",
-    phoneNumber = "012345678",
-    billNumber = "TRX012345",
-    terminalLabel = "POS-01",
+    billNumber = "INV-001",
     expirationDays = 1,
 )
 
-// Static QR (reusable, payer enters the amount)
-val static = khqr.createQr(
+// Static QR — reusable, payer enters the amount
+val staticQr = khqr.createQr(
     accountId = "your_name@bank",
     merchantName = "Your Shop",
     merchantCity = "Phnom Penh",
-    static = true,   // or simply pass amount = 0.0
+    static = true,
 )
 ```
 
-### `createQr` parameters
+**Parameters:**
 
-| Parameter        | Type           | Default        | Notes                                              |
-|------------------|----------------|----------------|----------------------------------------------------|
-| `accountId`      | `String`       | **required**   | Bakong account id, e.g. `your_name@bank` (≤32).    |
-| `merchantName`   | `String`       | **required**   | ≤25 characters.                                    |
-| `merchantCity`   | `String`       | `"Phnom Penh"` | ≤15 characters.                                    |
-| `amount`         | `Double`       | `0.0`          | `≤ 0` produces a static QR.                         |
-| `currency`       | `KHQRCurrency` | `KHR`          | `KHQRCurrency.USD` or `KHQRCurrency.KHR`.           |
-| `storeLabel`     | `String?`      | `null`         | Optional.                                          |
-| `phoneNumber`    | `String?`      | `null`         | Cambodian numbers are normalised (855→0…).         |
-| `billNumber`     | `String?`      | `null`         | Optional bill/invoice reference.                   |
-| `terminalLabel`  | `String?`      | `null`         | Optional terminal id.                              |
-| `static`         | `Boolean`      | `false`        | Force a static (reusable) QR.                      |
-| `expirationDays` | `Int`          | `1`            | Validity window for dynamic QRs.                   |
+| Parameter        | Type           | Default        | Notes                               |
+|------------------|----------------|----------------|-------------------------------------|
+| `accountId`      | `String`       | required       | Bakong account ID, e.g. `name@bank` (≤32) |
+| `merchantName`   | `String`       | required       | ≤25 characters                      |
+| `merchantCity`   | `String`       | `"Phnom Penh"` | ≤15 characters                      |
+| `amount`         | `Double`       | `0.0`          | `≤ 0` produces a static QR          |
+| `currency`       | `KHQRCurrency` | `KHR`          | `KHQRCurrency.USD` or `.KHR`        |
+| `billNumber`     | `String?`      | `null`         | Invoice/order reference             |
+| `storeLabel`     | `String?`      | `null`         | Store name label                    |
+| `phoneNumber`    | `String?`      | `null`         | Cambodian numbers normalised automatically |
+| `terminalLabel`  | `String?`      | `null`         | POS terminal ID                     |
+| `static`         | `Boolean`      | `false`        | Force a static (reusable) QR        |
+| `expirationDays` | `Int`          | `1`            | Validity for dynamic QRs            |
 
-### MD5 hash
+### QR Image
+
+```kotlin
+khqr.qrImage(qr)                   // ByteArray (PNG, 512px)
+QrImage.pngBytes(qr, size = 300)   // ByteArray, custom size
+QrImage.save(qr, "out/qr.png")     // write PNG to file, returns path
+QrImage.base64(qr)                 // base64-encoded PNG string
+QrImage.dataUri(qr)                // "data:image/png;base64,..." — embed in <img src>
+```
+
+### MD5 Hash
 
 ```kotlin
 val md5 = khqr.generateMd5(qr)
 // e.g. "3dc50c785e47a215feb336d44807825c"
+// Use this hash to check or look up a payment.
 ```
 
-### QR image
+### Check a Payment
+
+Requires a valid token and a Cambodia IP (or RBK token).
 
 ```kotlin
-import dev.khqr.QrImage
+import dev.khqr.TransactionStatus
 
-khqr.qrImage(qr)                       // ByteArray (PNG, 512px)
-QrImage.pngBytes(qr, size = 300)       // ByteArray
-QrImage.save(qr, "out/khqr.png")       // writes a file, returns the path
-QrImage.base64(qr)                     // base64 PNG (no prefix)
-QrImage.dataUri(qr)                    // "data:image/png;base64,..." for <img src>
+when (khqr.checkPayment(md5)) {
+    TransactionStatus.PAID   -> println("Payment confirmed ✅")
+    TransactionStatus.UNPAID -> println("Not paid yet")
+}
 ```
 
-### Deep link
+### Get Payment Details
 
-Turn a QR into a link that opens the payer's banking app (requires a token):
+Useful for static QRs where the payer sets the amount:
+
+```kotlin
+val info = khqr.getPayment(md5)   // PaymentInfo? — null if unpaid or not found
+if (info != null) {
+    println("${info.amount} ${info.currency} from ${info.fromAccountId}")
+}
+```
+
+`PaymentInfo` fields: `hash`, `fromAccountId`, `toAccountId`, `currency`, `amount`, `description`, `createdDateMs`, `acknowledgedDateMs`, `trackingStatus`, `receiverBank`, `receiverBankAccount`, `instructionRef`, `externalRef`.
+
+### Bulk Check (up to 50)
+
+```kotlin
+val paidHashes: List<String> = khqr.checkBulkPayments(listOf(md5a, md5b, md5c))
+// returns only the hashes that are PAID
+
+// For more than 50, chunk first:
+val allPaid = allMd5s.chunked(50).flatMap { khqr.checkBulkPayments(it) }
+```
+
+### Deep Link
+
+Opens the payer's Bakong or banking app directly:
 
 ```kotlin
 val link = khqr.generateDeeplink(
@@ -273,186 +221,75 @@ val link = khqr.generateDeeplink(
     callbackUrl = "https://your-site.com/checkout/return",
     appIconUrl = "https://your-site.com/logo.png",
     appName = "YourApp",
-)   // e.g. "https://bakong.page.link/XXXX"  (null if Bakong returned none)
+)   // returns a "https://bakong.page.link/..." URL, or null
 ```
 
-### Check a payment
-
-```kotlin
-when (khqr.checkPayment(md5)) {
-    TransactionStatus.PAID   -> { /* fulfil the order */ }
-    TransactionStatus.UNPAID -> { /* not paid yet / not found */ }
-}
-```
-
-### Get payment details
-
-Useful for static QRs where the payer chooses the amount:
-
-```kotlin
-val info = khqr.getPayment(md5)   // PaymentInfo? (null if unpaid/not found)
-if (info != null) {
-    println("${info.amount} ${info.currency} from ${info.fromAccountId}")
-}
-```
-
-`PaymentInfo` exposes: `hash`, `fromAccountId`, `toAccountId`, `currency`, `amount`,
-`description`, `createdDateMs`, `acknowledgedDateMs`, `trackingStatus`, `receiverBank`,
-`receiverBankAccount`, `instructionRef`, `externalRef`.
-
-### Check many payments at once
-
-```kotlin
-// Max 50 hashes per call (throws KHQRException above 50).
-val paid: List<String> = khqr.checkBulkPayments(listOf(md5a, md5b, md5c))
-// returns only the hashes that are PAID
-```
-
-Chunk larger lists yourself:
-
-```kotlin
-val allPaid = allMd5.chunked(50).flatMap { khqr.checkBulkPayments(it) }
-```
-
-### Polling for payment
-
-The library keeps `checkPayment` simple (one call → one status). Implement polling with
-a sensible backoff so you don't burn through API quota — for example:
-
-```kotlin
-import dev.khqr.TransactionStatus
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
-
-suspend fun awaitPayment(khqr: KHQR, md5: String, timeout: kotlin.time.Duration = 10.minutes): Boolean {
-    val start = System.currentTimeMillis()
-    while (System.currentTimeMillis() - start < timeout.inWholeMilliseconds) {
-        if (khqr.checkPayment(md5) == TransactionStatus.PAID) return true
-        val elapsedSec = (System.currentTimeMillis() - start) / 1000
-        val delay = when {            // dynamic backoff
-            elapsedSec <= 300  -> 5.seconds
-            elapsedSec <= 900  -> 10.seconds
-            elapsedSec <= 3600 -> 15.seconds
-            else               -> 5.minutes
-        }
-        kotlinx.coroutines.delay(delay)
-    }
-    return false
-}
-```
-
-### Renew token
+### Renew Token
 
 ```kotlin
 val freshToken = KHQR().renewToken("your_registered_email@example.com")
 val khqr = KHQR(freshToken)
 ```
 
-## Environments & IP restriction
+---
+
+## Environments
 
 ```kotlin
 import dev.khqr.BakongEnvironment
 
-KHQR(token, BakongEnvironment.PRODUCTION)  // https://api-bakong.nbc.gov.kh   (default)
+KHQR(token, BakongEnvironment.PRODUCTION)  // default — https://api-bakong.nbc.gov.kh
 KHQR(token, BakongEnvironment.SANDBOX)     // https://sit-api-bakong.nbc.gov.kh
 ```
 
-- **Production transaction checks only accept requests from Cambodia IP addresses.**
-  Calls from elsewhere return HTTP 403 (surfaced as a `KHQRException`).
-- To call from outside Cambodia, use a **Bakong Relay (RBK) token** — any token starting
-  with `rbk` is automatically sent to `https://api.bakongrelay.com`.
-- QR/MD5/image generation are **fully offline** and need no token or special IP.
+> Production transaction checks **only accept requests from Cambodia IP addresses**. HTTP 403 from other IPs is surfaced as a `KHQRException`. QR generation, MD5, and image rendering are fully offline and need no token or special IP.
 
-## KHQR card UI & branding
+---
 
-This library produces the QR **string and image** only. When you show KHQR to customers,
-you must follow NBC's official **KHQR brand & content guidelines** and use only the
-approved KHQR logos/assets obtained from the NBC. Do not recolor or distort them. This
-project ships **no** NBC brand assets.
+## Web Demo (Kotlin/JS)
 
-## Building from source
+The [`web/`](web/) folder is a Kotlin/JS browser demo — generates KHQR codes, MD5 hashes, and QR images entirely in the browser. See [`web/README.md`](web/README.md).
+
+```bash
+cd web && ./gradlew jsBrowserDistribution
+```
+
+---
+
+## Building from Source
 
 ```bash
 git clone https://github.com/Jumnert/Kotlin-Bakong.git
 cd Kotlin-Bakong
-./gradlew build              # compile + test
-./gradlew test               # tests only
-./gradlew publishToMavenLocal # install to ~/.m2 for local consumption
+./gradlew build    # compile + all tests (fully offline, no token needed)
 ```
 
-- Toolchain: Kotlin **2.4.0**, Gradle **9.6.1** (via the wrapper), JVM-17 bytecode.
-- The tests are **offline** (golden EMVCo/CRC/MD5 vectors + an in-process HTTP server),
-  so `./gradlew build` needs no network and no token.
+Requires JDK 17+. Kotlin 2.4.0, Gradle 9.6.1 (via wrapper), JVM-17 bytecode output.
+
+---
 
 ## Releasing
 
-Versioning lives in `build.gradle.kts` (`version = "0.1.0"`). To cut a release:
-
-1. Bump `version` in `build.gradle.kts` and commit.
-2. Tag and push:
-
-   ```bash
-   git tag v0.1.0
-   git push origin v0.1.0
-   ```
-
-That tag triggers the [`Release` workflow](.github/workflows/release.yml), which builds,
-publishes to **GitHub Packages**, and creates a **GitHub Release** with the jars attached.
-
-### Publishing via JitPack
-
-No workflow needed — JitPack builds on demand:
-
-1. Push your code/tag to GitHub.
-2. Visit `https://jitpack.io/#Jumnert/Kotlin-Bakong` and click **Get it** on the tag.
-3. Consumers add the JitPack repo and `com.github.Jumnert:Kotlin-Bakong:<tag>`
-   (see [Installation](#option-a--jitpack-easiest-zero-setup)).
-
-`jitpack.yml` pins the build to JDK 17 and runs `publishToMavenLocal`.
-
-### Publishing to GitHub Packages (manual)
+Bump `version` in `build.gradle.kts`, then tag and push:
 
 ```bash
-export GITHUB_REPOSITORY="Jumnert/Kotlin-Bakong"
-export GITHUB_ACTOR="Jumnert"
-export GITHUB_TOKEN="ghp_your_personal_access_token"   # scope: write:packages
-./gradlew publish
+git tag v0.1.0 && git push origin v0.1.0
 ```
 
-(In CI these are provided automatically; the `GitHubPackages` Maven repo only activates
-when those three env vars are present, so local `publishToMavenLocal` is unaffected.)
+This triggers the [Release workflow](.github/workflows/release.yml), which publishes to GitHub Packages and creates a GitHub Release with jars attached. JitPack picks up the tag automatically.
 
-### Publishing to Maven Central
-
-1. Change `group` in `build.gradle.kts` to a coordinate you own — e.g.
-   `io.github.<Jumnert>` (verify ownership via the Central Portal) or your own domain.
-2. Add the **Sonatype Central** publishing plugin and **GPG signing** (artifacts must be
-   signed; this repo already produces the required `-sources` and `-javadoc` jars).
-3. Store your Central token and signing key as CI secrets and publish from a tag.
-
-See the [Central Portal docs](https://central.sonatype.org/) for current steps.
-
-## Continuous Integration
-
-- **[`CI`](.github/workflows/ci.yml)** — runs `./gradlew build` (compile + all tests) on
-  every push and PR to `main`, on Temurin JDK 21, and uploads the test report.
-- **[`Release`](.github/workflows/release.yml)** — on a `v*` tag, builds, publishes to
-  GitHub Packages, and creates a GitHub Release with the jars.
+---
 
 ## Resources
 
-- Bakong Open API portal (register / bearer token): <https://api-bakong.nbc.gov.kh/>
-- KHQR SDK & API documentation: <https://api-bakong.nbc.gov.kh/document>
+- Bakong Open API portal & token registration: <https://api-bakong.nbc.gov.kh/>
+- API documentation: <https://api-bakong.nbc.gov.kh/document>
+- Sandbox (SIT) API: <https://sit-api-bakong.nbc.gov.kh/>
+- Bakong Relay (outside Cambodia): <https://bakongrelay.com/>
 - [Bakong Open API Document (PDF)](https://bakong.nbc.gov.kh/download/KHQR/integration/Bakong%20Open%20API%20Document.pdf)
-- [KHQR SDK (PDF)](https://bakong.nbc.gov.kh/download/KHQR%20SDK.pdf)
-- Development (SIT) API: <https://sit-api-bakong.nbc.gov.kh/>
-- Production API: <https://api-bakong.nbc.gov.kh/>
-- Bakong Relay (use the API from outside Cambodia): <https://bakongrelay.com/>
 
-Prior art that informed this port: the Python [`bakong-khqr`](https://github.com/bsthen/bakong-khqr)
-package and the [Spring Boot integration example](https://github.com/tongbora/Bakong-API-Integration-with-Spring-Boot).
+---
 
 ## License
 
-Released under an **Educational Use License** — see [LICENSE](LICENSE). Unofficial; not
-affiliated with the National Bank of Cambodia. Test in the sandbox before going live.
+[Educational Use License](LICENSE) — unofficial, not affiliated with the National Bank of Cambodia.
