@@ -161,7 +161,7 @@
         <div class="khqr-card">
           <div class="khqr-header">
             <img id="khqrLogoImg" class="khqr-logo-img" src="khqr-logo.svg" alt="KHQR"
-                 onerror="this.remove(); var t=document.getElementById('khqrLogoText'); if (t) t.style.display='inline';" />
+                 onerror="if(this.src.indexOf('khqr-logo.svg')>-1){this.src='khqr-logo.png';return;} this.remove(); var t=document.getElementById('khqrLogoText'); if (t) t.style.display='inline';" />
             <span id="khqrLogoText" class="khqr-logo" style="display:none;">KHQR</span>
           </div>
           <div class="khqr-body">
