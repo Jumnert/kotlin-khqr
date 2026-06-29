@@ -1,10 +1,10 @@
-# kotlin-bakong
+# kotlin-khqr
 
 **Kotlin/JVM library for Bakong KHQR** — Cambodia's national QR payment standard by the National Bank of Cambodia (NBC).
 
 Generate EMVCo-compliant KHQR payment strings, MD5 transaction hashes, scannable QR images, and deep links. Verify payments through the Bakong Open API — all with a tiny dependency footprint, no Spring required.
 
-[![JitPack](https://jitpack.io/v/Jumnert/Kotlin-Bakong.svg)](https://jitpack.io/#Jumnert/Kotlin-Bakong)
+[![JitPack](https://jitpack.io/v/Jumnert/kotlin-khqr.svg)](https://jitpack.io/#Jumnert/kotlin-khqr)
 
 > ⚠️ **Unofficial & educational.** Not affiliated with or endorsed by the NBC. Always test in the sandbox before handling real money. See [LICENSE](LICENSE).
 
@@ -48,7 +48,7 @@ Add the dependency in `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("com.github.Jumnert:Kotlin-Bakong:main-SNAPSHOT")
+    implementation("com.github.Jumnert:kotlin-khqr:main-SNAPSHOT")
 }
 ```
 
@@ -65,7 +65,7 @@ dependencies {
 </repositories>
 <dependency>
   <groupId>com.github.Jumnert</groupId>
-  <artifactId>Kotlin-Bakong</artifactId>
+  <artifactId>kotlin-khqr</artifactId>
   <version>main-SNAPSHOT</version>
 </dependency>
 ```
@@ -259,8 +259,8 @@ cd web && ./gradlew jsBrowserDistribution
 ## Building from Source
 
 ```bash
-git clone https://github.com/Jumnert/Kotlin-Bakong.git
-cd Kotlin-Bakong
+git clone https://github.com/Jumnert/kotlin-khqr.git
+cd kotlin-khqr
 ./gradlew build    # compile + all tests (fully offline, no token needed)
 ```
 

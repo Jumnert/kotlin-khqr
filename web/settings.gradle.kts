@@ -5,4 +5,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "kotlin-bakong-web"
+rootProject.name = "kotlin-khqr-web"

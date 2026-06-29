@@ -1,6 +1,6 @@
 # Bakong KHQR — Kotlin Web Demo
 
-A browser demo for the [`kotlin-bakong`](../README.md) library, built with **Kotlin/JS**
+A browser demo for the [`kotlin-khqr`](../README.md) library, built with **Kotlin/JS**
 (Kotlin Multiplatform). It generates KHQR payment codes, the MD5 transaction hash, and a
 scannable QR image **entirely in the browser**, and lets you check a payment with your own
 Bakong credentials.
@@ -151,7 +151,7 @@ npx wrangler pages deploy build/dist/js/productionExecutable
 ## Hosting a JVM backend (not Vercel)
 
 If you want server-side transaction checks (so they aren't blocked by CORS, and can run
-from a Cambodia IP), host a small JVM service that uses the `kotlin-bakong` library on a
+from a Cambodia IP), host a small JVM service that uses the `kotlin-khqr` library on a
 platform that runs the JVM — e.g. **Railway, Render, Fly.io, Google Cloud Run** (Docker),
 or any VPS. Then point this static frontend's check call at that backend instead of calling
 Bakong directly. Those platforms run a container/JVM continuously, which Vercel does not.

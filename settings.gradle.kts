@@ -1,1 +1,1 @@
-rootProject.name = "kotlin-bakong"
+rootProject.name = "kotlin-khqr"

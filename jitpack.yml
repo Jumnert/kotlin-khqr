@@ -1,6 +1,6 @@
 # JitPack build configuration.
 # JitPack builds the library on demand when someone requests
-#   com.github.Jumnert:Kotlin-Bakong:main-SNAPSHOT
+#   com.github.Jumnert:kotlin-khqr:main-SNAPSHOT
 # Gradle 9.6.1 (via the wrapper) and Kotlin 2.4.0 run on JDK 17.
 jdk:
   - openjdk17

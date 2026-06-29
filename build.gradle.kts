@@ -55,17 +55,17 @@ publishing {
         create<MavenPublication>("maven") {
             from(components["java"])
             pom {
-                name.set("kotlin-bakong")
+                name.set("kotlin-khqr")
                 description.set(
                     "Kotlin library for generating Bakong KHQR (EMVCo) payment QR codes, " +
                         "MD5 hashes, deeplinks, QR images, and verifying transactions via the " +
                         "Bakong Open API. For educational and integration-reference purposes."
                 )
-                url.set("https://github.com/Jumnert/Kotlin-Bakong")
+                url.set("https://github.com/Jumnert/kotlin-khqr")
                 licenses {
                     license {
                         name.set("Educational Use License")
-                        url.set("https://github.com/Jumnert/Kotlin-Bakong/blob/main/LICENSE")
+                        url.set("https://github.com/Jumnert/kotlin-khqr/blob/main/LICENSE")
                     }
                 }
                 developers {
@@ -75,8 +75,8 @@ publishing {
                     }
                 }
                 scm {
-                    url.set("https://github.com/Jumnert/Kotlin-Bakong")
-                    connection.set("scm:git:https://github.com/Jumnert/Kotlin-Bakong.git")
+                    url.set("https://github.com/Jumnert/kotlin-khqr")
+                    connection.set("scm:git:https://github.com/Jumnert/kotlin-khqr.git")
                 }
             }
         }
