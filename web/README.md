@@ -79,25 +79,44 @@ cd build/dist/js/productionExecutable && python3 -m http.server 8099
 
 ## Deploy to Vercel
 
-Vercel's build image has no JVM/Gradle, so **build first, then deploy the static output**
-(don't rely on Vercel's Git build step for this project).
+> 🛑 **Getting `404: NOT_FOUND` from Vercel?** That happens when you import the repo
+> through Vercel's **dashboard / Git integration**. Vercel's build image has **no JVM or
+> Gradle**, so it can't build this project and ends up serving nothing. **Don't use the
+> Git import.** Build the static site yourself (where the JVM is) and upload the prebuilt
+> folder — that folder is the one containing `index.html`:
+> `build/dist/js/productionExecutable`.
 
-### One-off, from your machine
+### Easiest — the deploy script
 
 ```bash
 cd web
-./gradlew jsBrowserDistribution
-npx vercel deploy build/dist/js/productionExecutable --prod   # first run links/creates the project
+./deploy.sh            # builds, then deploys build/dist/js/productionExecutable to Vercel
 ```
 
-### Automated (GitHub Actions)
+The first run will ask you to log in (`vercel login`) and link/create a project; after
+that it just deploys. (Use `./deploy.sh --preview` for a non-production deploy.)
+
+### Or the equivalent commands by hand
+
+```bash
+cd web
+./gradlew jsBrowserDistribution                              # -> build/dist/js/productionExecutable/
+npx vercel deploy build/dist/js/productionExecutable --prod  # deploy the BUILT folder, not web/ or the repo root
+```
+
+The trick is pointing Vercel at `build/dist/js/productionExecutable` (the folder that has
+`index.html`). Deploying `web/` or the repo root is what gives you the 404.
+
+### Automated (GitHub Actions — no local CLI)
 
 `.github/workflows/web-deploy.yml` (in the repo root) builds the bundle on a runner (which
-has the JVM) and deploys it with the Vercel CLI. Add these repository secrets:
+*does* have the JVM) and deploys it with the Vercel CLI. Add these repository secrets:
 
 - `VERCEL_TOKEN` — from https://vercel.com/account/tokens
-- `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` — from `.vercel/project.json` after running
-  `vercel link`, or the project settings.
+- `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` — run `vercel link` once locally and read them
+  from `.vercel/project.json`, or copy them from the Vercel project settings.
+
+Then every push to `web/**` builds and deploys automatically.
 
 ## Other static hosts
 
