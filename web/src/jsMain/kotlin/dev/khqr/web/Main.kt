@@ -63,7 +63,12 @@ private fun onGenerate() {
         setText("cardMerchant", params.merchantName)
         setText("cardSym", symbol)
         setText("qrBadge", symbol)
-        setText("cardAmount", if (isStatic) "0" else (amount.asDynamic().toFixed(2) as String))
+        val amountOpts = if (params.currency == KHQRCurrency.USD) {
+            kotlin.js.json("minimumFractionDigits" to 2, "maximumFractionDigits" to 2)
+        } else {
+            kotlin.js.json("maximumFractionDigits" to 0)
+        }
+        setText("cardAmount", if (isStatic) "0" else (amount.asDynamic().toLocaleString("en-US", amountOpts) as String))
 
         show("resultCard")
         // pre-fill the MD5 used by the payment checker
