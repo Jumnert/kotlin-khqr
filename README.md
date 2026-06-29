@@ -37,6 +37,7 @@ Add JitPack to `settings.gradle.kts`:
 
 ```kotlin
 dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         mavenCentral()
         maven { url = uri("https://jitpack.io") }
@@ -48,7 +49,7 @@ Add the dependency in `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("com.github.Jumnert:kotlin-khqr:main-SNAPSHOT")
+    implementation("com.github.Jumnert:kotlin-khqr:0.2.0")
 }
 ```
 
@@ -66,7 +67,7 @@ dependencies {
 <dependency>
   <groupId>com.github.Jumnert</groupId>
   <artifactId>kotlin-khqr</artifactId>
-  <version>main-SNAPSHOT</version>
+  <version>0.2.0</version>
 </dependency>
 ```
 
