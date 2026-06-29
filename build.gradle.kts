@@ -66,22 +66,22 @@ publishing {
                         "MD5 hashes, deeplinks, QR images, and verifying transactions via the " +
                         "Bakong Open API. For educational and integration-reference purposes."
                 )
-                url.set("https://github.com/your-username/kotlin-bakong")
+                url.set("https://github.com/Jumnert/Kotlin-Bakong")
                 licenses {
                     license {
                         name.set("Educational Use License")
-                        url.set("https://github.com/your-username/kotlin-bakong/blob/main/LICENSE")
+                        url.set("https://github.com/Jumnert/Kotlin-Bakong/blob/main/LICENSE")
                     }
                 }
                 developers {
                     developer {
-                        id.set("your-username")
+                        id.set("Jumnert")
                         name.set("Your Name")
                     }
                 }
                 scm {
-                    url.set("https://github.com/your-username/kotlin-bakong")
-                    connection.set("scm:git:https://github.com/your-username/kotlin-bakong.git")
+                    url.set("https://github.com/Jumnert/Kotlin-Bakong")
+                    connection.set("scm:git:https://github.com/Jumnert/Kotlin-Bakong.git")
                 }
             }
         }

@@ -57,7 +57,7 @@ internal class BakongClient(
             .timeout(timeout)
             .header("Content-Type", "application/json")
             .header("Accept", "application/json")
-            .header("User-Agent", "kotlin-bakong/$LIBRARY_VERSION (+https://github.com/your-username/kotlin-bakong)")
+            .header("User-Agent", "kotlin-bakong/$LIBRARY_VERSION (+https://github.com/Jumnert/Kotlin-Bakong)")
             .POST(HttpRequest.BodyPublishers.ofString(bodyJson, Charsets.UTF_8))
 
         if (!token.isNullOrBlank()) {

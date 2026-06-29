@@ -111,7 +111,7 @@ The artifact id is **`kotlin-bakong`**, version **`0.1.0`**.
 
 ### Option A — JitPack (easiest, zero setup)
 
-[![](https://jitpack.io/v/your-username/kotlin-bakong.svg)](https://jitpack.io/#your-username/kotlin-bakong)
+[![](https://jitpack.io/v/Jumnert/Kotlin-Bakong.svg)](https://jitpack.io/#Jumnert/Kotlin-Bakong)
 
 `settings.gradle.kts`:
 
@@ -128,12 +128,15 @@ dependencyResolutionManagement {
 
 ```kotlin
 dependencies {
-    implementation("com.github.your-username:kotlin-bakong:0.1.0")
+    implementation("com.github.Jumnert:Kotlin-Bakong:main-SNAPSHOT")
 }
 ```
 
-> Replace `your-username` with your GitHub username/org. You can use a release tag
-> (`0.1.0`), a branch (`main-SNAPSHOT`), or a commit hash as the version.
+> The coordinate is **case-sensitive** and must match the repo exactly:
+> `com.github.Jumnert:Kotlin-Bakong`. The version can be a branch
+> (`main-SNAPSHOT`), a short commit hash (e.g. `e15bf15`), or a Git tag. There are
+> no release tags yet, so use `main-SNAPSHOT` — or push a tag (see
+> [Releasing](#releasing)) and then use that tag as the version, e.g. `0.1.0`.
 
 ### Option B — GitHub Packages
 
@@ -142,7 +145,7 @@ Published automatically by the [release workflow](#releasing) under group `dev.k
 ```kotlin
 repositories {
     maven {
-        url = uri("https://maven.pkg.github.com/your-username/kotlin-bakong")
+        url = uri("https://maven.pkg.github.com/Jumnert/Kotlin-Bakong")
         credentials {
             username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GITHUB_ACTOR")
             password = providers.gradleProperty("gpr.key").orNull ?: System.getenv("GITHUB_TOKEN")
@@ -162,9 +165,9 @@ Requires owning the group coordinate — see [Releasing → Maven Central](#publ
 
 ```xml
 <dependency>
-  <groupId>com.github.your-username</groupId>
-  <artifactId>kotlin-bakong</artifactId>
-  <version>0.1.0</version>
+  <groupId>com.github.Jumnert</groupId>
+  <artifactId>Kotlin-Bakong</artifactId>
+  <version>main-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -370,8 +373,8 @@ project ships **no** NBC brand assets.
 ## Building from source
 
 ```bash
-git clone https://github.com/your-username/kotlin-bakong.git
-cd kotlin-bakong
+git clone https://github.com/Jumnert/Kotlin-Bakong.git
+cd Kotlin-Bakong
 ./gradlew build              # compile + test
 ./gradlew test               # tests only
 ./gradlew publishToMavenLocal # install to ~/.m2 for local consumption
@@ -401,8 +404,8 @@ publishes to **GitHub Packages**, and creates a **GitHub Release** with the jars
 No workflow needed — JitPack builds on demand:
 
 1. Push your code/tag to GitHub.
-2. Visit `https://jitpack.io/#your-username/kotlin-bakong` and click **Get it** on the tag.
-3. Consumers add the JitPack repo and `com.github.your-username:kotlin-bakong:<tag>`
+2. Visit `https://jitpack.io/#Jumnert/Kotlin-Bakong` and click **Get it** on the tag.
+3. Consumers add the JitPack repo and `com.github.Jumnert:Kotlin-Bakong:<tag>`
    (see [Installation](#option-a--jitpack-easiest-zero-setup)).
 
 `jitpack.yml` pins the build to JDK 17 and runs `publishToMavenLocal`.
@@ -410,8 +413,8 @@ No workflow needed — JitPack builds on demand:
 ### Publishing to GitHub Packages (manual)
 
 ```bash
-export GITHUB_REPOSITORY="your-username/kotlin-bakong"
-export GITHUB_ACTOR="your-username"
+export GITHUB_REPOSITORY="Jumnert/Kotlin-Bakong"
+export GITHUB_ACTOR="Jumnert"
 export GITHUB_TOKEN="ghp_your_personal_access_token"   # scope: write:packages
 ./gradlew publish
 ```
@@ -422,7 +425,7 @@ when those three env vars are present, so local `publishToMavenLocal` is unaffec
 ### Publishing to Maven Central
 
 1. Change `group` in `build.gradle.kts` to a coordinate you own — e.g.
-   `io.github.<your-username>` (verify ownership via the Central Portal) or your own domain.
+   `io.github.<Jumnert>` (verify ownership via the Central Portal) or your own domain.
 2. Add the **Sonatype Central** publishing plugin and **GPG signing** (artifacts must be
    signed; this repo already produces the required `-sources` and `-javadoc` jars).
 3. Store your Central token and signing key as CI secrets and publish from a tag.
