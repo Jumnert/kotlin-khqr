@@ -1,0 +1,52 @@
+name: Web Deploy (Vercel)
+
+# Builds the Kotlin/JS static bundle on a runner (which has the JVM that Vercel lacks)
+# and deploys it to Vercel. The deploy step is skipped automatically if the
+# VERCEL_TOKEN secret is not configured, so the build still acts as a check.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - '.github/workflows/web-deploy.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build static bundle
+        run: ./gradlew jsBrowserDistribution --no-daemon --stacktrace
+
+      - name: Deploy to Vercel
+        if: ${{ env.VERCEL_TOKEN != '' }}
+        run: npx --yes vercel deploy build/dist/js/productionExecutable --prod --yes --token="$VERCEL_TOKEN"

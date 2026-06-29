@@ -1,0 +1,55 @@
+Educational Use License
+Copyright (c) 2026 kotlin-bakong contributors
+
+Preamble
+--------
+This project ("the Software") is an UNOFFICIAL, community-built Kotlin library that
+implements the Bakong KHQR standard and integrates with the Bakong Open API. It is
+provided for EDUCATIONAL and INTEGRATION-REFERENCE purposes.
+
+"Bakong", "KHQR", and related names, logos, and marks are the property of the
+National Bank of Cambodia (NBC). This project is not affiliated with, endorsed by, or
+sponsored by the NBC. No NBC brand assets are distributed with this Software.
+
+Grant of Permission
+-------------------
+Permission is hereby granted, free of charge, to any person obtaining a copy of this
+Software and associated documentation files, to use, copy, modify, merge, publish,
+and distribute the Software, subject to the following conditions:
+
+1. Purpose. The Software is intended to be used for learning, evaluation, prototyping,
+   and as a reference for building integrations. You are free to study it and to build
+   upon it, including in commercial products, provided you comply with the conditions
+   below and with all applicable NBC / Bakong terms, policies, and onboarding
+   requirements.
+
+2. Attribution. The above copyright notice, this permission notice, and the Preamble
+   shall be included in all copies or substantial portions of the Software.
+
+3. Branding & Compliance. Any customer-facing use of KHQR (including any QR "card" UI)
+   must follow the official NBC KHQR brand and content guidelines and must use only
+   the approved KHQR assets obtained directly from the NBC. This Software does not
+   grant any rights to NBC trademarks or assets.
+
+4. No Misrepresentation. You must not represent this Software, or any derivative of it,
+   as an official product of the National Bank of Cambodia.
+
+5. Lawful Use. You are solely responsible for using the Software in compliance with
+   the Bakong Open API terms of service, your developer-token agreement, and all
+   applicable laws and regulations.
+
+Disclaimer of Warranty
+----------------------
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE, AND NONINFRINGEMENT. THE AUTHORS MAKE NO GUARANTEE THAT QR CODES,
+HASHES, OR API INTERACTIONS PRODUCED BY THIS SOFTWARE WILL BE ACCEPTED OR PROCESSED
+CORRECTLY BY ANY BANK, WALLET, OR THE BAKONG SYSTEM. ALWAYS TEST THOROUGHLY IN A
+SANDBOX ENVIRONMENT BEFORE HANDLING REAL FUNDS.
+
+Limitation of Liability
+-----------------------
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES,
+OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM,
+OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE,
+INCLUDING ANY FINANCIAL LOSS RELATED TO PAYMENTS OR TRANSACTIONS.

@@ -1,0 +1,130 @@
+# Bakong KHQR — Kotlin Web Demo
+
+A browser demo for the [`kotlin-bakong`](../README.md) library, built with **Kotlin/JS**
+(Kotlin Multiplatform). It generates KHQR payment codes, the MD5 transaction hash, and a
+scannable QR image **entirely in the browser**, and lets you check a payment with your own
+Bakong credentials.
+
+Because it compiles to a plain static site (HTML + JS), it deploys to **Vercel** (or any
+static host) with no server.
+
+> ⚠️ Unofficial & educational. Prefer the **Sandbox** environment. Your token is used only
+> in your browser and sent directly to Bakong — it is never sent to the site's host.
+
+---
+
+## Why Kotlin/JS (and not Ktor) for Vercel
+
+Vercel runs **static sites** and **serverless functions** (Node, Python, Go, …). It does
+**not** run a long-lived JVM process, so a **Ktor/JVM server cannot be hosted on Vercel.**
+
+This demo instead compiles **Kotlin → JavaScript**, producing a static bundle that Vercel
+serves natively. The pure KHQR logic (TLV encoding, CRC-16, MD5, the EMVCo assembler) is
+ported into `commonMain` so it runs in the browser. It is byte-for-byte identical to the
+JVM library — guaranteed by a shared golden-vector test (`./gradlew jvmTest`).
+
+> If you instead want the **full** library (server-side transaction checks from a Cambodia
+> IP, ZXing image generation, the JDK HTTP client), run it on a JVM host — see
+> [Hosting a JVM backend](#hosting-a-jvm-backend-not-vercel).
+
+## What works where
+
+| Feature                         | In the browser (Vercel) | Server-side (JVM lib) |
+|---------------------------------|-------------------------|-----------------------|
+| Generate KHQR string + MD5      | ✅ fully offline        | ✅                    |
+| Render QR image                 | ✅ (via `qrcodejs`)     | ✅ (via ZXing)        |
+| Check payment / get payment     | ⚠️ usually blocked by CORS¹ | ✅                |
+
+¹ Browsers can't call the Bakong API cross-origin (no CORS headers), and production checks
+require a Cambodia IP or an `rbk…` Relay token. The demo surfaces this clearly. For reliable
+checks, call the API server-side with the JVM library, or use a Relay token.
+
+## Project layout
+
+```
+web/
+├── build.gradle.kts                 # Kotlin Multiplatform: jvm() (tests) + js{ browser }
+├── vercel.json                      # static-deploy config (prebuilt output)
+└── src/
+    ├── commonMain/kotlin/.../core/  # KHQR core ported to multiplatform (pure Kotlin)
+    ├── jvmTest/kotlin/.../core/     # golden-vector test (runs on the JVM, no browser)
+    └── jsMain/
+        ├── kotlin/.../Main.kt       # browser logic (form → generate/check)
+        └── resources/index.html     # Material UI (Materialize)
+```
+
+## Build & run locally
+
+Requires JDK 17+. The Kotlin/JS plugin downloads Node/Yarn automatically on first build.
+
+```bash
+cd web
+
+# Run the shared-logic tests (fast, no browser needed)
+./gradlew jvmTest
+
+# Live dev server with hot reload at http://localhost:8080
+./gradlew jsBrowserDevelopmentRun --continuous
+
+# Production static bundle -> build/dist/js/productionExecutable/
+./gradlew jsBrowserDistribution
+```
+
+Preview the production bundle like a static host would:
+
+```bash
+cd build/dist/js/productionExecutable && python3 -m http.server 8099
+# open http://localhost:8099
+```
+
+## Deploy to Vercel
+
+Vercel's build image has no JVM/Gradle, so **build first, then deploy the static output**
+(don't rely on Vercel's Git build step for this project).
+
+### One-off, from your machine
+
+```bash
+cd web
+./gradlew jsBrowserDistribution
+npx vercel deploy build/dist/js/productionExecutable --prod   # first run links/creates the project
+```
+
+### Automated (GitHub Actions)
+
+`.github/workflows/web-deploy.yml` (in the repo root) builds the bundle on a runner (which
+has the JVM) and deploys it with the Vercel CLI. Add these repository secrets:
+
+- `VERCEL_TOKEN` — from https://vercel.com/account/tokens
+- `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` — from `.vercel/project.json` after running
+  `vercel link`, or the project settings.
+
+## Other static hosts
+
+The same `build/dist/js/productionExecutable/` folder deploys anywhere static:
+
+```bash
+# Netlify
+npx netlify deploy --prod --dir=build/dist/js/productionExecutable
+
+# Cloudflare Pages
+npx wrangler pages deploy build/dist/js/productionExecutable
+
+# GitHub Pages — copy the folder's contents to your gh-pages branch
+```
+
+## Hosting a JVM backend (not Vercel)
+
+If you want server-side transaction checks (so they aren't blocked by CORS, and can run
+from a Cambodia IP), host a small JVM service that uses the `kotlin-bakong` library on a
+platform that runs the JVM — e.g. **Railway, Render, Fly.io, Google Cloud Run** (Docker),
+or any VPS. Then point this static frontend's check call at that backend instead of calling
+Bakong directly. Those platforms run a container/JVM continuously, which Vercel does not.
+
+## Security notes
+
+- Use the **Sandbox** environment and a **sandbox/test token** for public demos.
+- The token never leaves the browser except in the direct request to Bakong; this site's
+  host never sees it. Still, **don't paste a production token into a deployment you don't
+  control**.
+- Always serve over **HTTPS** (Vercel does this automatically).
