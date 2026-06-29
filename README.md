@@ -50,19 +50,12 @@ Add the dependency in `build.gradle.kts`:
 ```kotlin
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-plugins {
-    kotlin("jvm") version "2.x.x"
-}
-
 dependencies {
     implementation("com.github.Jumnert:kotlin-khqr:0.2.0")
 }
 
-// Required if your JDK is newer than Kotlin's max supported target
 kotlin {
-    compilerOptions {
-        jvmTarget = JvmTarget.JVM_21   // or JVM_17, JVM_25 — match your project
-    }
+    compilerOptions { jvmTarget = JvmTarget.JVM_21 }
 }
 ```
 
