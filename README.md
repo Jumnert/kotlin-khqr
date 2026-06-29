@@ -52,7 +52,7 @@ dependencies {
 }
 ```
 
-> Use `main-SNAPSHOT` for the latest, or pin to a specific commit hash or tag (e.g. `0.1.0`).
+> Use `main-SNAPSHOT` for the latest, or pin to a specific commit hash or tag (e.g. `0.2.0`).
 
 **Maven:**
 
@@ -273,7 +273,7 @@ Requires JDK 17+. Kotlin 2.4.0, Gradle 9.6.1 (via wrapper), JVM-17 bytecode outp
 Bump `version` in `build.gradle.kts`, then tag and push:
 
 ```bash
-git tag v0.1.0 && git push origin v0.1.0
+git tag 0.2.0 && git push origin 0.2.0
 ```
 
 This triggers the [Release workflow](.github/workflows/release.yml), which publishes to GitHub Packages and creates a GitHub Release with jars attached. JitPack picks up the tag automatically.
