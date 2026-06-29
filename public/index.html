@@ -29,10 +29,11 @@
        the official red, per the KHQR brand guideline (the logo is an NBC trademark). */
     .khqr-card { max-width: 320px; margin: 0 auto; background: #fff; border-radius: 16px;
                  overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,.16); }
-    .khqr-header { background: #ed1b24; height: 84px; display: flex; align-items: flex-start;
+    .khqr-header { background: #e21f26; height: 88px; display: flex; align-items: flex-start;
                    justify-content: center; padding-top: 16px;
-                   clip-path: polygon(0 0, 100% 0, 100% 100%, 74% 62%, 0 62%); }
+                   clip-path: polygon(0 0, 100% 0, 100% 100%, 80% 66%, 0 66%); }
     .khqr-logo { color: #fff; font-weight: 800; font-size: 1.5rem; letter-spacing: 2px; }
+    .khqr-logo-img { height: 26px; margin-top: 2px; }
     .khqr-body { padding: 2px 22px 22px; }
     .khqr-merchant { text-transform: uppercase; color: #8d8d8d; font-size: .8rem;
                      font-weight: 600; letter-spacing: .5px; margin-top: 6px; }
@@ -144,9 +145,14 @@
     <!-- Result -->
     <div class="row" id="resultCard" style="display:none;">
       <div class="col s12 m5">
-        <!-- KHQR card. Swap the "KHQR" text for the official KHQR logo asset from the NBC. -->
+        <!-- Drop the official KHQR logo at web/src/jsMain/resources/khqr-logo.svg (from the
+             NBC brand kit). Until then, the "KHQR" text shows as a fallback. -->
         <div class="khqr-card">
-          <div class="khqr-header"><span class="khqr-logo">KHQR</span></div>
+          <div class="khqr-header">
+            <img id="khqrLogoImg" class="khqr-logo-img" src="khqr-logo.svg" alt="KHQR"
+                 onerror="this.remove(); var t=document.getElementById('khqrLogoText'); if (t) t.style.display='inline';" />
+            <span id="khqrLogoText" class="khqr-logo" style="display:none;">KHQR</span>
+          </div>
           <div class="khqr-body">
             <div class="khqr-merchant" id="cardMerchant">Your Shop</div>
             <div class="khqr-amount"><span class="sym" id="cardSym">$</span><span id="cardAmount">0</span></div>

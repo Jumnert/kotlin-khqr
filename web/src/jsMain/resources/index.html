@@ -145,9 +145,14 @@
     <!-- Result -->
     <div class="row" id="resultCard" style="display:none;">
       <div class="col s12 m5">
-        <!-- KHQR card. Swap the "KHQR" text for the official KHQR logo asset from the NBC. -->
+        <!-- Drop the official KHQR logo at web/src/jsMain/resources/khqr-logo.svg (from the
+             NBC brand kit). Until then, the "KHQR" text shows as a fallback. -->
         <div class="khqr-card">
-          <div class="khqr-header"><span class="khqr-logo">KHQR</span></div>
+          <div class="khqr-header">
+            <img id="khqrLogoImg" class="khqr-logo-img" src="khqr-logo.svg" alt="KHQR"
+                 onerror="this.remove(); var t=document.getElementById('khqrLogoText'); if (t) t.style.display='inline';" />
+            <span id="khqrLogoText" class="khqr-logo" style="display:none;">KHQR</span>
+          </div>
           <div class="khqr-body">
             <div class="khqr-merchant" id="cardMerchant">Your Shop</div>
             <div class="khqr-amount"><span class="sym" id="cardSym">$</span><span id="cardAmount">0</span></div>
